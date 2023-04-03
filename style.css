@@ -26,11 +26,12 @@ body {
     margin-left: 50%; 
     margin-right: 50%;
 }
-.image-holder {
+.component-holder {
     position: relative;
-    max-width: 200px; /* adjust as needed */
-    border: 2px solid #4592ff;
-    padding: 5px;
+    height: 200px; /* adjust as needed */
+    width: 200px; /* adjust as needed */
+    border: 1px solid #4592ff;
+    /* padding: 5px; */
 }
 
 .actions-container {
