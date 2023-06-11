@@ -44,15 +44,14 @@ body {
     margin-left: 50%;
     margin-right: 50%;
     margin-bottom: 20px;
-    width: 100px;
+    width: 50%;
     height: 50px;
 }
-  
-img {
-    display: block;
-    width: 100%;
-    height: auto;
+
+#file {
+    display: none;
 }
+  
   
 #resize-handle {
     position: absolute;

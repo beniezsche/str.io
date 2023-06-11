@@ -1,6 +1,8 @@
 "use strict";
 
 const add = document.getElementById("add");
+const fileInput = document.getElementById("file");
+const textInput = document.getElementById("text");
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 
@@ -12,6 +14,8 @@ const red = "#E74C3C";
 const green = "#2ECC71";
 const blue = "#3498DB";
 
+const backgroundColour = "#0e1111";
+
 const documentHeight = document.documentElement.clientHeight;
 const documentWidth = document.documentElement.clientWidth;
 
@@ -20,8 +24,6 @@ const canvasWidth = (9/16) * documentHeight;
 canvas.width = canvasWidth;
 canvas.height = documentHeight;
 
-const img = new Image();        
-// img.src = './cat.jpg';    
 
 function clearCanvas() {
   context.clearRect(0, 0, canvas.width, canvas.height);
@@ -40,7 +42,7 @@ function getCursorPosition(canvas, event) {
 
 class Container {
 
-  constructor(x, y, width, height, src) {
+  constructor(x, y, width, height, src, zIndex) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -49,6 +51,8 @@ class Container {
     this.isDraggable = true;
     this.isResizable = false;
     this.isRotatable = false;
+
+    this.zIndex = zIndex;
 
     this.image = new Image();
     this.image.src = src
@@ -87,20 +91,28 @@ class Container {
     this.rotateHandle = new Handle(rotateHandleX, rotateHandleY, resizeHandleSide, resizeHandleSide);
   }
 
+  isPointInsideRotatedContainer(x,y) {
+
+    const a = -this.rotation
+
+    const diffX = x -  (this.x + this.width / 2);
+    const diffY = y -  (this.y + this.height / 2);
+
+    //Rotate the canvas around the origin
+    const unrotatedX = (diffX * Math.cos(a) - diffY * Math.sin(a)) ;
+    const unrotatedY = (diffX * Math.sin(a) + diffY * Math.cos(a)) ;
+
+    const newDiffX = (this.x + this.width / 2) + unrotatedX;
+    const newDiffY = (this.y + this.height / 2) + unrotatedY;
+
+    const isPointInsideContainer = this.isPointInsideContainer(newDiffX, newDiffY);
+
+    return isPointInsideContainer
+  }
+
   isPointInsideContainer(x, y) {
 
     if(x > 0 && y > 0 && x > this.x && x < (this.x + this.width) && y > this.y && y < (this.y + this.height)) {
-
-      // console.log(x > 0);
-      // console.log(y > 0);
-
-      // console.log(x > this.x);
-      // console.log(x < (this.x + this.width));
-
-      
-      // console.log(y > this.y);
-      // console.log(y < (this.y + this.height));
-      
       return true;
     }
 
@@ -108,8 +120,9 @@ class Container {
   }
 }
 
-class Text extends Container {
-  constructor(text) {
+class TextContainer extends Container {
+  constructor(x, y, width, height, src, zIndex, text) {
+    super(x, y, width, height, src, zIndex);
     this.text = text;
   }
 }
@@ -125,17 +138,6 @@ class Handle {
   isPointInsideContainer(x, y) {
 
     if(x > 0 && y > 0 && x > this.x && x < (this.x + this.width) && y > this.y && y < (this.y + this.height)) {
-
-      // console.log(x > 0);
-      // console.log(y > 0);
-
-      // console.log(x > this.x);
-      // console.log(x < (this.x + this.width));
-
-      
-      // console.log(y > this.y);
-      // console.log(y < (this.y + this.height));
-      
       return true;
     }
 
@@ -146,138 +148,59 @@ class Handle {
 }
 
 class Border {
-
   constructor(x, y, width, height) {
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
   }
-
-  createBorder() {
-
-  }
-
 }
 
-add.addEventListener('change', (event) => {
+const reader = new FileReader();
+const img = new Image();
+
+fileInput.addEventListener('change', (event) => {
   const selectedFile = event.target.files[0];
-  const reader = new FileReader();
-
-  reader.addEventListener('load', () => {
-    img.src = reader.result;
-
-    let imageWidth = img.width;
-    let imageHeight = img.height;
-
-    let newImageWidth = 100;
-    let newImageHeight = (newImageWidth * imageHeight) / imageWidth;
-
-    // const image = Image();
-    // image.src = reader.result;
-    //open image selector
-    let container = new Container(canvas.width/2, canvas.height/2, newImageWidth, newImageHeight, reader.result);
-
-    containerList.push(container);
-
-    context.fillStyle = red;
-    context.fillRect(container.x, container.y , container.width, container.height);
-  });
-
+  
   if (selectedFile) {
     reader.readAsDataURL(selectedFile);
   }
+});
+
+reader.addEventListener('load', (event) => {
+  img.src = event.target.result;
+});
+
+img.addEventListener('load', () => {
+
+  const imageWidth = img.width;
+  const imageHeight = img.height;
+
+  const newImageWidth = 100;
+  const newImageHeight = (newImageWidth * imageHeight) / imageWidth;
+
+  const container = new Container(canvas.width/2, canvas.height/2, newImageWidth, newImageHeight, reader.result, containerList.size);
+  containerList.push(container);
 
 
+  drawContainers();
+});
 
+textInput.addEventListener('click', function() {
+
+  let textPrompt = prompt("Please some text", "");
+  if (textPrompt != null) {
+    const text = new TextContainer(canvas.width/2, canvas.height/2, 100, 20, undefined ,containerList.size, textPrompt);
+    containerList.push(text);
+    
+    drawContainers();
+  }
 
 });
 
-// add.addEventListener("click", (event) => {
-
-//   // img.src = './cat.jpg';  
-  
-//   img.src = './C:/Users/ZIDAN-PC/Desktop/image.jpg';
-
-
-
-//   img.onload = () => {
-
-//       //open image selector
-//     let container = new Container(canvas.width/2, canvas.height/2, img.width, img.height, "cat.jpg");
-
-//     containerList.push(container);
-
-//     context.fillStyle = red;
-//     context.fillRect(container.x, container.y , container.width, container.height);
-
-//   }
-
-// });
-
-function changeContainerPropertiesAndDrawContainer(container) {
-
-  // if(container.rotation > 0) {
-  //   drawRotatedContainer(container)
-  // }
-  // else {
-  //   drawSelectedContainer(container);
-  // }
-
-  drawRotatedContainer(container)
-
-}
-
-function drawUnselectedContainer(container) {
-
-    // let previousX = container.x;
-    // let previousY = container.y;
-
-    context.setTransform(1, 0, 0, 1, 0, 0);
-    // context.save()
-
-    let deg = container.rotation;
-
-    //Convert degrees to radian 
-    let rad = deg * Math.PI / 180;
-
-    //Set the origin to the center of the image
-    context.translate(container.x + container.width / 2, container.y + container.height / 2);
-
-    //Rotate the canvas around the origin
-    context.rotate(container.rotation);
-
-    // context.fillStyle = "black";
-    // context.fillRect(0, 0 , canvasWidth, documentHeight);
-
-    context.translate(-(container.x + container.width / 2), -(container.y + container.height / 2));
-
-    //draw the object
-    context.fillStyle = red;
-    context.fillRect(container.x , container.y, container.width, container.height);
-
-        // img.onload = () => {          context.drawImage(img, 0, 0);        };
-
-    context.drawImage(container.image, container.x, container.y, container.width, container.height);
-
-    context.setTransform(1, 0, 0, 1, 0, 0);
-
-    // Restore canvas state as saved from above
-    // context.restore();
-
-    // container.x = previousX;
-    // container.y = previousY;
-
-}
-
 function drawRotatedContainer(container) { 
 
-
-  // let previousX = container.x;
-  // let previousY = container.y;
-
   context.setTransform(1, 0, 0, 1, 0, 0);
-  // context.save()
 
   let deg = container.rotation;
 
@@ -290,23 +213,34 @@ function drawRotatedContainer(container) {
   //Rotate the canvas around the origin
   context.rotate(container.rotation);
 
-  // context.fillStyle = "black";
-  // context.fillRect(0, 0 , canvasWidth, documentHeight);
-
   context.translate(-(container.x + container.width / 2), -(container.y + container.height / 2));
 
-  drawSelectedContainer(container);
+  if(container.isSelected) {
+    drawSelectedContainer(container);
+  }
+  else{
+    drawUnselectedContainer(container);
+  }
 
   context.setTransform(1, 0, 0, 1, 0, 0);
 
-  // Restore canvas state as saved from above
-  // context.restore();
+}
 
-  context.strokeStyle = "black";
-  context.strokeRect(container.x, container.y, container.width, container.height);
+const font =  "50px sans-serif";
 
-  // container.x = previousX;
-  // container.y = previousY;
+function drawUnselectedContainer(container) {
+  //draw the object
+  context.fillStyle = red;
+  // context.fillRect(container.x , container.y, container.width, container.height);
+
+  if(container instanceof TextContainer) {
+    context.font = font;
+    context.textBaseline = "top";
+    context.fillText(container.text, container.x, container.y);
+  }
+  else {
+    context.drawImage(container.image, container.x, container.y, container.width, container.height);
+  }
 
 }
 
@@ -314,9 +248,19 @@ function drawSelectedContainer(container) {
 
   //draw the object
   context.fillStyle = red;
-  context.fillRect(container.x , container.y, container.width, container.height);
+  // context.fillRect(container.x , container.y, container.width, container.height);
 
-  context.drawImage(container.image, container.x, container.y, container.width, container.height);
+  if(container instanceof TextContainer) {
+    context.font = font;
+    context.textBaseline = "top";
+    console.log(container instanceof TextContainer);
+    console.log(container.text);
+    context.fillText(container.text, container.x, container.y);
+  }
+  else {
+    context.drawImage(container.image, container.x, container.y, container.width, container.height);
+  }
+
 
   //calculate the border
   container.border.x = container.x - margin;
@@ -344,7 +288,6 @@ function drawSelectedContainer(container) {
 
 
   //calculate midpoint of width
-
   const midpointXBottom = container.border.x + (container.border.width/2) ;
   const midpointYBottom = container.border.y;
 
@@ -358,7 +301,6 @@ function drawSelectedContainer(container) {
   const rotateHandleX = (midpointXTop) - (rotateHandleSide/2);
   const rotateHandleY = (midpointYTop) - (rotateHandleSide/2); 
 
-  // console.log(midpointX + ", " + midpointY);
 
   container.rotateHandle.x = rotateHandleX;
   container.rotateHandle.y = rotateHandleY;
@@ -384,67 +326,96 @@ let mouseDownY = 0;
 
 let isMouseDown = false;
 
+let draggingDeltaX = 0;
+let draggingDeltaY = 0;
+
+function findIfPointInsideRotatedContainer(x, y, originX, originY, rotation, container) {
+
+  const diffX = x - originX;
+  const diffY = y - originY;
+
+  //Rotate the canvas around the origin
+  const unrotatedX = (diffX * Math.cos(-rotation) - diffY * Math.sin(-rotation));
+  const unrotatedY = (diffX * Math.sin(-rotation) + diffY * Math.cos(-rotation));
+
+  const newDiffX = originX + unrotatedX;
+  const newDiffY = originY + unrotatedY;
+
+
+  return findIfPointIsInsideContainer(newDiffX, newDiffY, container.x, container.y, container.width, container.height);
+
+}
+
+function findIfPointIsInsideContainer(testX, testY, x, y, width, height) {
+
+  if(testX > 0 && testY > 0 && testX > x && testX < (x + width) && testY > y && testY < (y + height)) {
+    return true;
+  }
+
+  return false;
+}
+
+
 canvas.addEventListener("mousedown", (event) => {
 
   clearCanvas();
-
-  // console.log("mouse down");
 
   isMouseDown = true;
 
   mouseDownX = getCursorPosition(canvas, event).x;
   mouseDownY = getCursorPosition(canvas, event).y;
 
-  // console.log("mouseDownX: " + mouseDownX + ", " +  "mouseDownY: " + mouseDownY);
+  let lastPos = 0;
+  let selectedCount = 0;
 
-  for (const container of containerList) {
+  for (const [position,container] of containerList.entries()) {
 
-    console.log(container.border.x + ", " + container.border.y + ", " + container.border.width + ", " + container.border.height);
-    console.log(container.x + ", " + container.y + ", " + container.width + ", " + container.height);
-
-    if(container.isPointInsideContainer(mouseDownX, mouseDownY)) {
-      // console.log("container is selected");
-      container.isSelected = true;
-      container.isDraggable = true;
-
-      changeContainerPropertiesAndDrawContainer(container);
-
-      
+    if(container.isPointInsideRotatedContainer(mouseDownX, mouseDownY)) {
+      selectedCount++;
+      lastPos = position
     }
 
-    else if(container.resizeHandle.isPointInsideContainer(mouseDownX, mouseDownY)) {
-
-      console.log("container is resizable");
-
+    else if(findIfPointInsideRotatedContainer(mouseDownX, mouseDownY, container.x + container.width/2, container.y + container.height/2, container.rotation, container.resizeHandle)) { 
       container.isResizable = true;
-
-      changeContainerPropertiesAndDrawContainer(container);
-      
-
     }
 
-    else if(container.rotateHandle.isPointInsideContainer(mouseDownX, mouseDownY)) {
-
-      console.log("rotatable");
-      // container.rotation += 30;
-
+    else if(findIfPointInsideRotatedContainer(mouseDownX, mouseDownY, container.x + container.width/2, container.y + container.height/2, container.rotation, container.rotateHandle)) {
       container.isRotatable = true;
-
-      drawSelectedContainer(container);
-
     }
     
     else {
       container.isSelected = false;
-
-      drawUnselectedContainer(container);
-
-
     }
-
   }
 
+  if(selectedCount >= 1) {
+    const elementToBeBroughtToTop = containerList[lastPos];
+
+    containerList[lastPos].isSelected = true;
+    containerList[lastPos].isDraggable = true;
+
+    draggingDeltaX = mouseDownX - containerList[lastPos].x;
+    draggingDeltaY = mouseDownY - containerList[lastPos].y;
+
+    containerList.splice(lastPos, 1);
+    containerList.splice(containerList.length, 1, elementToBeBroughtToTop);
+  }
+  // containerList[lastPos].zIndex = containerList.length - 1;
+
+
+
+  drawContainers();
+
 });
+
+function drawContainers() {
+
+  // containerList.sort((a, b) => a.zIndex - b.zIndex);
+
+  for (const container of containerList) {
+      drawRotatedContainer(container);
+  }
+}
 
 canvas.addEventListener("mousemove", (event) => {
 
@@ -455,92 +426,56 @@ canvas.addEventListener("mousemove", (event) => {
 
   for (const container of containerList) {
 
-    // console.log((mouseDownX != mouseMoveX || mouseDownY != mouseMoveY) && container.isSelected);
-    // console.log("isDragging:" + container.isDragging); 
-
     if (container.isSelected) {
 
       if((mouseDownX !== mouseMoveX || mouseDownY !== mouseMoveY) && container.isDraggable && isMouseDown) { // && container.isPointInsideContainer(mouseMoveX, mouseMoveY) && isMouseDown) {
 
-        console.log("container is draggable");
-
-        const updatedContainerPositionX = mouseMoveX  - (container.width/2) ;
-        const updatedContainerPositionY = mouseMoveY - (container.height/2) ;
+        const updatedContainerPositionX = mouseMoveX  - draggingDeltaX; 
+        const updatedContainerPositionY = mouseMoveY - draggingDeltaY; 
 
         container.x = updatedContainerPositionX;
         container.y = updatedContainerPositionY;
-
-        changeContainerPropertiesAndDrawContainer(container);
 
       }
 
       else if (container.isResizable && isMouseDown) {
 
-        console.log("container is resizing");
-        // container.isDragging = false;
-
-
-        //console.log("container.height: " + container.height + " + diffY: " + diffY + " total = " + (container.height + diffY));
-
         let ratio = container.width/container.height;
 
         const updatedWidth = mouseMoveX - container.x - (margin * 2);
-        const updatedHeight = (updatedWidth * container.height)/container.width;//mouseMoveY - container.y - (margin * 2) ;
-
-        console.log(updatedHeight);
+        const updatedHeight = (updatedWidth * container.height)/container.width;
 
         container.width = updatedWidth;
         container.height = updatedHeight;
-
-        changeContainerPropertiesAndDrawContainer(container);
 
       }
 
       else if(container.isRotatable && isMouseDown) {
 
-        //container.rotation = -90; //container.rotation + 1;
-
         let centerX = container.x + container.width / 2;
-        let centerY = container.y + container.height / 2
+        let centerY = container.y + container.height / 2;
 
         let deltaX = mouseMoveX - centerX;
         let deltaY = mouseMoveY - centerY;
-        let radians = Math.atan2(deltaY, deltaX)
-        let degrees = ((radians * 180) / Math.PI);
-        degrees  = (degrees + 360) % 360;
-        // if (true) {
-        //   degrees  = (degrees + 360) % 360;
-        // }
-        console.log('angle to degree:',{deltaX,deltaY,radians,degrees})
+        let radians =  Math.atan2(deltaY, deltaX) + (Math.PI/2)
 
         container.rotation = radians;
-
-
-        changeContainerPropertiesAndDrawContainer(container);
 
       }
 
       else {
-
-        changeContainerPropertiesAndDrawContainer(container);
-
+        
       }
-
     }
-
-    else {
-      drawUnselectedContainer(container);
-    }
-  
   }
+
+  drawContainers();
   
 });
 
 canvas.addEventListener("mouseup", (event) => {
 
   clearCanvas();
-
-  console.log("mouse up");
 
   isMouseDown = false;
 
@@ -549,35 +484,15 @@ canvas.addEventListener("mouseup", (event) => {
     container.isResizable = false;
     container.isRotatable = false;
     container.isDraggable = false;
-    // container.isSelected = false;
 
-    if (container.isSelected) {
-      changeContainerPropertiesAndDrawContainer(container);
-    }
 
-    else {
-      drawUnselectedContainer(container);
-    }
+    draggingDeltaX = 0;
+    draggingDeltaY = 0;
    
   }
+
+  drawContainers();
 });
-
-let rect = {
-  x: 0,
-  y: 0,
-};
-
-window.addEventListener("load", (event) => {
-  draw();
-});
-
-function draw() {
-  if (canvas.getContext) {
-
-  }
-}
-
-
 
 
 
