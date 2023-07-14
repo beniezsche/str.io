@@ -56,20 +56,21 @@ body {
 }
 
 .actions-container .action-item {
-    margin: 2px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
-
-
-
-
 
 #file {
     display: none;
 }
-/* 
+
+#foo {
+    display: none;
+}
+
 #text {
     display: none;
-} */
+}
   
   
 #resize-handle {

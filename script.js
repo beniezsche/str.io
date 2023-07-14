@@ -4,6 +4,7 @@ const add = document.getElementById("add");
 const fileInput = document.getElementById("file");
 const textInput = document.getElementById("text");
 const canvas = document.getElementById("canvas");
+const backgroundColourPicker = document.getElementById("background");
 const context = canvas.getContext("2d");
 
 const containerList = [];
@@ -14,7 +15,7 @@ const red = "#E74C3C";
 const green = "#2ECC71";
 const blue = "#3498DB";
 
-const backgroundColour = "#FFFFE0";
+let backgroundColour = "#FFFFE0";
 
 const documentHeight = document.documentElement.clientHeight;
 const documentWidth = document.documentElement.clientWidth;
@@ -226,6 +227,16 @@ textInput.addEventListener('click', function() {
     
     drawContainers();
   }
+
+});
+
+document.getElementById("foo").addEventListener('change', (event) => {
+  backgroundColour = document.getElementById("foo").value;
+});
+
+backgroundColourPicker.addEventListener('click', (event) => {
+
+  document.getElementById("foo").jscolor.show();
 
 });
 

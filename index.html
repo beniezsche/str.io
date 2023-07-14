@@ -3,7 +3,7 @@
 <head>
     <title>Str.io - Story Creator</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="jscolor-2.5.1/jscolor.js"></script> 
 </head>
 
 <body>
@@ -14,15 +14,20 @@
     <div class="actions-container">
 
       <div class="action-item">
-        <label for="file"><img id="add" src="image.png" width="30" height="30"/> </label>
+        <label for="file"><img id="add" src="assets/image.png" width="30" height="30"/> </label>
         <input type="file" id="file"/>
       </div>
       <div class="action-item">
-        <img id="text" src="text.png" width="30" height="30"/>
+        <img id="text" src="assets/text.png" width="30" height="30"/>
       </div>
+
       <div class="action-item">
-        <img id="background" src="background.png" width="30" height="30"/>
+        <input id="foo" data-jscolor="{}" value="cc4499">
+        <img id="background" src="assets/background.png" width="30" height="30"/>
       </div>
+      <!-- <div class="action-item">
+        <img id="video" src="assets/movie.png" width="30" height="30"/>
+      </div> -->
     </div>
 
 
@@ -49,7 +54,6 @@
     </video> -->
 
     <script src="script.js"></script> 
- 
 </body>
 
 </html>
