@@ -15,7 +15,7 @@ const red = "#E74C3C";
 const green = "#2ECC71";
 const blue = "#3498DB";
 
-let backgroundColour = "#FFFFE0";
+let backgroundColour = "#FFFFFF";
 
 const documentHeight = document.documentElement.clientHeight;
 const documentWidth = document.documentElement.clientWidth;
