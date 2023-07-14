@@ -14,15 +14,17 @@ const red = "#E74C3C";
 const green = "#2ECC71";
 const blue = "#3498DB";
 
-const backgroundColour = "#0e1111";
+const backgroundColour = "#FFFFE0";
 
 const documentHeight = document.documentElement.clientHeight;
 const documentWidth = document.documentElement.clientWidth;
 
-const canvasWidth = (9/16) * documentHeight;
+
+const canvasHeight = documentHeight;
+const canvasWidth = documentWidth; //(9/16) * documentHeight;
 
 canvas.width = canvasWidth;
-canvas.height = documentHeight;
+canvas.height = canvasHeight;
 
 
 function clearCanvas() {
@@ -39,6 +41,28 @@ function getCursorPosition(canvas, event) {
   return {x:x,
           y:y};
 }
+
+document.addEventListener('keydown', (event) => {
+
+  if(event.key === "Backspace" || 
+      event.key === "Enter" || 
+      event.key === "Shift" ||
+      event.key === "Control" ||
+      event.key === "Alt")
+    return;
+
+  for(let container of containerList) {
+    if(container instanceof TextContainer && container.isSelected) {
+      container.text = container.text + event.key;
+
+      const newWidth = context.measureText(container.text).width;
+      console.log(newWidth);
+      container.width = newWidth; 
+    }
+  }
+
+  drawContainers();
+});
 
 class Container {
 
@@ -89,14 +113,21 @@ class Container {
     const rotateHandleY = (midpointYTop ) - (rotateHandleSide/2); 
 
     this.rotateHandle = new Handle(rotateHandleX, rotateHandleY, resizeHandleSide, resizeHandleSide);
+
+    const deleteHandleSize = 10;
+
+    const deleteHandleX = (this.border.x + this.border.width) - (deleteHandleSize/2);
+    const deleteHandleY = (this.border.y) - (deleteHandleSize/2); 
+
+    this.deleteHandle = new Handle(deleteHandleX, deleteHandleY, deleteHandleSize, deleteHandleSize);
   }
 
   isPointInsideRotatedContainer(x,y) {
 
     const a = -this.rotation
 
-    const diffX = x -  (this.x + this.width / 2);
-    const diffY = y -  (this.y + this.height / 2);
+    const diffX = x - (this.x + this.width / 2);
+    const diffY = y - (this.y + this.height / 2);
 
     //Rotate the canvas around the origin
     const unrotatedX = (diffX * Math.cos(a) - diffY * Math.sin(a)) ;
@@ -200,7 +231,7 @@ textInput.addEventListener('click', function() {
 
 function drawRotatedContainer(container) { 
 
-  context.setTransform(1, 0, 0, 1, 0, 0);
+  // context.setTransform(1, 0, 0, 1, 0, 0);
 
   let deg = container.rotation;
 
@@ -218,7 +249,7 @@ function drawRotatedContainer(container) {
   if(container.isSelected) {
     drawSelectedContainer(container);
   }
-  else{
+  else {
     drawUnselectedContainer(container);
   }
 
@@ -226,7 +257,7 @@ function drawRotatedContainer(container) {
 
 }
 
-const font =  "50px sans-serif";
+const font =  "20px serif";
 
 function drawUnselectedContainer(container) {
   //draw the object
@@ -253,8 +284,6 @@ function drawSelectedContainer(container) {
   if(container instanceof TextContainer) {
     context.font = font;
     context.textBaseline = "top";
-    console.log(container instanceof TextContainer);
-    console.log(container.text);
     context.fillText(container.text, container.x, container.y);
   }
   else {
@@ -314,10 +343,20 @@ function drawSelectedContainer(container) {
   context.lineTo(midpointXTop, midpointYTop);
   context.stroke();
 
-
   //draw the new rotate handle
   context.fillStyle = blue;
   context.fillRect(rotateHandleX, rotateHandleY, rotateHandleSide, rotateHandleSide);
+
+  const deleteHandleSide = 10;
+  //calculate the new delete handle co ordinates
+  container.deleteHandle.x = (border.x + border.width) - (deleteHandleSide/2);
+  container.deleteHandle.y = (border.y) - (deleteHandleSide/2); 
+
+  const deleteHandle = container.deleteHandle;
+
+  //draw the new delete handle
+  context.fillStyle = red;
+  context.fillRect(deleteHandle.x, deleteHandle.y, deleteHandleSide, deleteHandleSide);
 
 }
 
@@ -382,6 +421,15 @@ canvas.addEventListener("mousedown", (event) => {
     else if(findIfPointInsideRotatedContainer(mouseDownX, mouseDownY, container.x + container.width/2, container.y + container.height/2, container.rotation, container.rotateHandle)) {
       container.isRotatable = true;
     }
+
+    else if(findIfPointInsideRotatedContainer(mouseDownX, mouseDownY, container.x + container.width/2, container.y + container.height/2, container.rotation, container.deleteHandle)) {
+      
+      const confirmDelete = confirm("Are you sure you want to delete this image?");
+
+      if(confirmDelete) {
+        containerList.splice(position , 1);
+      }
+    }
     
     else {
       container.isSelected = false;
@@ -400,8 +448,6 @@ canvas.addEventListener("mousedown", (event) => {
     containerList.splice(lastPos, 1);
     containerList.splice(containerList.length, 1, elementToBeBroughtToTop);
   }
-  // containerList[lastPos].zIndex = containerList.length - 1;
-
 
 
   drawContainers();
@@ -411,6 +457,9 @@ canvas.addEventListener("mousedown", (event) => {
 function drawContainers() {
 
   // containerList.sort((a, b) => a.zIndex - b.zIndex);
+  context.fillStyle = backgroundColour;
+  context.fillRect(0, 0, canvasWidth, documentHeight);
+
 
   for (const container of containerList) {
       drawRotatedContainer(container);

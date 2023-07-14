@@ -6,7 +6,7 @@ body {
     background-color: #e7e7e7;
     height: 100%;
     display: flex;
-    align-items: center;
+    overflow: hidden;
     justify-content: center;
 }
 
@@ -15,14 +15,7 @@ body {
     position: fixed;
     top: 0;
     bottom: 0;
-    
-    /* right: 0;
-    left: 0;  */
-    
-    /* width: 500px;
-    height: 1280px; */
-    /* margin-top: 20%;
-    margin-bottom: 20%; */
+    margin-bottom: 20%; 
     margin-left: 50%; 
     margin-right: 50%;
 }
@@ -38,19 +31,45 @@ body {
     display: flex;
     position: fixed;
     align-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+
     bottom: 0;
-    right: 0;
-    left: 0;
+    /* right: 0;
+    left: 0; */ 
+    padding-left: 12px;
+    padding-right: 12px;
+
+    padding-top: 0px;
+    padding-bottom: 0px;
+
+    border-radius: 20px;
+    border-color: #000;
+    border-style: solid;
+    border-width: 2px;
+    background-color: #fff;
     margin-left: 50%;
     margin-right: 50%;
     margin-bottom: 20px;
-    width: 50%;
+    /* width: 60px; */
     height: 50px;
 }
+
+.actions-container .action-item {
+    margin: 2px;
+}
+
+
+
+
 
 #file {
     display: none;
 }
+/* 
+#text {
+    display: none;
+} */
   
   
 #resize-handle {
