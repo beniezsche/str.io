@@ -43,28 +43,6 @@ function getCursorPosition(canvas, event) {
           y:y};
 }
 
-document.addEventListener('keydown', (event) => {
-
-  if(event.key === "Backspace" || 
-      event.key === "Enter" || 
-      event.key === "Shift" ||
-      event.key === "Control" ||
-      event.key === "Alt")
-    return;
-
-  for(let container of containerList) {
-    if(container instanceof TextContainer && container.isSelected) {
-      container.text = container.text + event.key;
-
-      const newWidth = context.measureText(container.text).width;
-      console.log(newWidth);
-      container.width = newWidth; 
-    }
-  }
-
-  drawContainers();
-});
-
 class Container {
 
   constructor(x, y, width, height, src, zIndex) {
@@ -218,16 +196,75 @@ img.addEventListener('load', () => {
   drawContainers();
 });
 
+let montserratBold = new FontFace("Montserrat", "url(assets/fonts/montserrat_700.ttf");
+let shadowsIntoLightBold = new FontFace("Shadows-Into-Light-Regular", "url(assets/fonts/shadows_into_light_400.ttf"); 
+
+const textSize = 30;
+
+let font = null 
+
+montserratBold.load().then((loadedFont) => {
+
+  alert("Font loaded!")
+
+  document.fonts.add(loadedFont)
+
+  console.log(loadedFont)
+
+  font = textSize + "px Montserrat";
+  
+});
+
+
+
+
+
+
 textInput.addEventListener('click', function() {
 
-  let textPrompt = prompt("Please some text", "");
+  let textPrompt = "They decided to plant an orchard \n of cotton candy."; //prompt("Please add some text", "");
   if (textPrompt != null) {
-    const text = new TextContainer(canvas.width/2, canvas.height/2, 100, 20, undefined ,containerList.size, textPrompt);
+
+    context.font = font
+
+    let metrics = context.measureText(textPrompt);
+    let fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+    let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+
+    const textWidth = metrics.width;
+
+    console.log(metrics)
+    console.log(actualHeight)
+    console.log(textWidth)
+
+    const text = new TextContainer(canvas.width/2, canvas.height/2, textWidth , textSize, undefined ,containerList.size, textPrompt);
     containerList.push(text);
     
     drawContainers();
   }
 
+});
+
+document.addEventListener('keydown', (event) => {
+
+  if(event.key === "Backspace" || 
+      event.key === "Enter" || 
+      event.key === "Shift" ||
+      event.key === "Control" ||
+      event.key === "Alt")
+    return;
+
+  for(let container of containerList) {
+    if(container instanceof TextContainer && container.isSelected) {
+      container.text = container.text + event.key;
+
+      const newWidth = context.measureText(container.text).width;
+      console.log(newWidth);
+      container.width = newWidth; 
+    }
+  }
+
+  drawContainers();
 });
 
 document.getElementById("foo").addEventListener('change', (event) => {
@@ -268,7 +305,7 @@ function drawRotatedContainer(container) {
 
 }
 
-const font =  "20px serif";
+
 
 function drawUnselectedContainer(container) {
   //draw the object
