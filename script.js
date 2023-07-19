@@ -199,7 +199,7 @@ img.addEventListener('load', () => {
 let montserratBold = new FontFace("Montserrat", "url(assets/fonts/montserrat_700.ttf");
 let shadowsIntoLightBold = new FontFace("Shadows-Into-Light-Regular", "url(assets/fonts/shadows_into_light_400.ttf"); 
 
-const textSize = 30;
+const textSize = 40;
 
 let font = null 
 
@@ -215,14 +215,9 @@ montserratBold.load().then((loadedFont) => {
   
 });
 
-
-
-
-
-
 textInput.addEventListener('click', function() {
 
-  let textPrompt = "They decided to plant an orchard \n of cotton candy."; //prompt("Please add some text", "");
+  let textPrompt = prompt("Please add some text", ""); //"They decided to plant an orchard\nof cotton candy."; 
   if (textPrompt != null) {
 
     context.font = font
@@ -248,7 +243,6 @@ textInput.addEventListener('click', function() {
 document.addEventListener('keydown', (event) => {
 
   if(event.key === "Backspace" || 
-      event.key === "Enter" || 
       event.key === "Shift" ||
       event.key === "Control" ||
       event.key === "Alt")
@@ -256,11 +250,34 @@ document.addEventListener('keydown', (event) => {
 
   for(let container of containerList) {
     if(container instanceof TextContainer && container.isSelected) {
-      container.text = container.text + event.key;
 
-      const newWidth = context.measureText(container.text).width;
+      if(event.key === "Enter")
+        container.text = container.text + "\n";
+      else if (event.key === "Backspace") {
+        //implement deletion
+      }
+      else 
+        container.text = container.text + event.key;
+
+      const splitString = container.text.split("\n");
+
+      let newWidth = container.width;
+
+      for(text of splitString) {
+        const w = context.measureText(text).width;
+        if(w > newWidth)
+          newWidth = w;
+      }
+
+      
       console.log(newWidth);
       container.width = newWidth; 
+
+      if(splitString.length > 1) {
+        const newHeight = (textSize + (margin * 2)) * splitString.length;
+        container.height = newHeight;
+      }
+      
     }
   }
 
@@ -305,7 +322,20 @@ function drawRotatedContainer(container) {
 
 }
 
+function drawText(container) {
+  context.font = font;
+  context.textBaseline = "top";
+  const splitStrings = container.text.split("\n");
 
+  let y = container.y;
+
+  for (text of splitStrings) {
+    context.fillText(text, container.x, y);
+    y += textSize + 20;
+  }
+
+  // context.fillText(container.text, container.x, container.y);
+}
 
 function drawUnselectedContainer(container) {
   //draw the object
@@ -313,9 +343,7 @@ function drawUnselectedContainer(container) {
   // context.fillRect(container.x , container.y, container.width, container.height);
 
   if(container instanceof TextContainer) {
-    context.font = font;
-    context.textBaseline = "top";
-    context.fillText(container.text, container.x, container.y);
+    drawText(container)
   }
   else {
     context.drawImage(container.image, container.x, container.y, container.width, container.height);
@@ -330,13 +358,13 @@ function drawSelectedContainer(container) {
   // context.fillRect(container.x , container.y, container.width, container.height);
 
   if(container instanceof TextContainer) {
-    context.font = font;
-    context.textBaseline = "top";
-    context.fillText(container.text, container.x, container.y);
+    drawText(container)
   }
   else {
     context.drawImage(container.image, container.x, container.y, container.width, container.height);
   }
+
+
 
 
   //calculate the border
