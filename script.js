@@ -28,6 +28,9 @@ canvas.width = canvasWidth;
 canvas.height = canvasHeight;
 
 
+// MODELS
+
+
 function clearCanvas() {
   context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -134,6 +137,9 @@ class TextContainer extends Container {
   constructor(x, y, width, height, src, zIndex, text) {
     super(x, y, width, height, src, zIndex);
     this.text = text;
+    this.isEditable = false;
+    this.cursorPositionX = 0;
+    this.cursorPositionY = 0;
   }
 }
 
@@ -199,7 +205,7 @@ img.addEventListener('load', () => {
 let montserratBold = new FontFace("Montserrat", "url(assets/fonts/montserrat_700.ttf");
 let shadowsIntoLightBold = new FontFace("Shadows-Into-Light-Regular", "url(assets/fonts/shadows_into_light_400.ttf"); 
 
-const textSize = 40;
+const textSize = 25;
 
 let font = null 
 
@@ -209,7 +215,7 @@ montserratBold.load().then((loadedFont) => {
 
   document.fonts.add(loadedFont)
 
-  console.log(loadedFont)
+  // console.log(loadedFont)
 
   font = textSize + "px Montserrat";
   
@@ -217,75 +223,126 @@ montserratBold.load().then((loadedFont) => {
 
 textInput.addEventListener('click', function() {
 
-  let textPrompt = prompt("Please add some text", ""); //"They decided to plant an orchard\nof cotton candy."; 
-  if (textPrompt != null) {
+  // let textPrompt = prompt("Please add some text", ""); //"They decided to plant an orchard\nof cotton candy."; 
+  // if (textPrompt != null) {
 
-    context.font = font
+  //   context.font = font
 
-    let metrics = context.measureText(textPrompt);
-    let fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-    let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+  //   let metrics = context.measureText(textPrompt);
+  //   let fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+  //   let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
 
-    const textWidth = metrics.width;
+  //   const textWidth = metrics.width;
 
-    console.log(metrics)
-    console.log(actualHeight)
-    console.log(textWidth)
+  //   console.log(metrics)
+  //   console.log(actualHeight)
+  //   console.log(textWidth)
 
-    const text = new TextContainer(canvas.width/2, canvas.height/2, textWidth , textSize, undefined ,containerList.size, textPrompt);
-    containerList.push(text);
+  //   const text = new TextContainer(canvas.width/2, canvas.height/2, textWidth , textSize, undefined ,containerList.size, textPrompt);
+  //   text.cursorPositionX = textPrompt.length;
+  //   containerList.push(text);
     
-    drawContainers();
-  }
+  //   drawContainers();
+  // }
+
+  openModal();
 
 });
 
-document.addEventListener('keydown', (event) => {
+// document.addEventListener('keydown', (event) => {
 
-  if(event.key === "Backspace" || 
-      event.key === "Shift" ||
-      event.key === "Control" ||
-      event.key === "Alt")
-    return;
+//   if(event.key === "Shift" ||
+//      event.key === "Control" ||
+//      event.key === "Alt")
+//      return;
 
-  for(let container of containerList) {
-    if(container instanceof TextContainer && container.isSelected) {
+//   for(let container of containerList) {
+//     if(container instanceof TextContainer && container.isSelected) {
 
-      if(event.key === "Enter")
-        container.text = container.text + "\n";
-      else if (event.key === "Backspace") {
-        //implement deletion
-      }
-      else 
-        container.text = container.text + event.key;
+//       container.isEditable = true;
 
-      const splitString = container.text.split("\n");
-
-      let newWidth = container.width;
-
-      for(text of splitString) {
-        const w = context.measureText(text).width;
-        if(w > newWidth)
-          newWidth = w;
-      }
-
+//       const splitString = container.text.split("\n");
       
-      console.log(newWidth);
-      container.width = newWidth; 
+//       if(event.key === "Enter") {
+        
+//         container.text = container.text + "\n";
+//         console.log(container.text);
+//         container.cursorPositionY += 1;
+//         container.cursorPositionX = 0;
+//       }
+//       else if (event.code === "Backspace") {
+//         //implement deletion
 
-      if(splitString.length > 1) {
-        const newHeight = (textSize + (margin * 2)) * splitString.length;
-        container.height = newHeight;
-      }
+//         let i = 0;
+//         let totalLength = 0;
+
+//         while(i < container.cursorPositionY) {
+//           totalLength += splitString[i].length + 1;
+//           i++;
+//         }
+
+
+//         //console.log(container.text.slice(0, container.cursorPositionX));
+//         container.text = container.text.slice(0,totalLength + container.cursorPositionX - 1) + container.text.slice(totalLength + container.cursorPositionX, container.text.length);
+//         container.cursorPositionX -= 1;
+//       }
+//       else if (event.code === "ArrowUp") {
+//         container.cursorPositionY -= 1;
+//       }
+//       else if (event.code === "ArrowDown") {
+//         container.cursorPositionY += 1; 
+//       }
+//       else if (event.code === "ArrowRight") {
+//         container.cursorPositionX += 1;
+//       }
+//       else if(event.code === "ArrowLeft") {
+//         container.cursorPositionX -= 1;
+//       }
+//       else {
+//         console.log(event.key);
+
+//         let i = 0;
+//         let totalLength = 0;
+
+//         while(i < container.cursorPositionY) {
+//           totalLength += splitString[i].length + 1;
+//           i++;
+//         }
+
+//         //console.log(container.text.slice(0, totalLength + container.cursorPositionX) + " + " +  event.key  + " + " + container.text.slice(totalLength + container.cursorPositionX, container.text.length));
+//         container.text = container.text.slice(0, totalLength + container.cursorPositionX) + event.key + container.text.slice(totalLength + container.cursorPositionX, container.text.length);
+//         container.cursorPositionX += 1;
+//       }
+
+//       const splitStringNew = container.text.split("\n");
+
+//       let newWidth = container.width;
+
+//       for(text of splitStringNew) {
+//         const w = context.measureText(text).width;
+//         if(w > newWidth)
+//           newWidth = w;
+//       }
       
-    }
-  }
+//       console.log(newWidth);
+//       container.width = newWidth; 
+
+//       if(splitStringNew.length > 1) {
+//         const newHeight = (textSize + (margin * 2)) * splitStringNew.length;
+//         container.height = newHeight;
+//       }
+      
+
+//     }
+//   }
+
+//   drawContainers();
+// });
+
+document.getElementById("foo").addEventListener('input', (event) => {
+  backgroundColour = document.getElementById("foo").value;
 
   drawContainers();
-});
-
-document.getElementById("foo").addEventListener('change', (event) => {
-  backgroundColour = document.getElementById("foo").value;
 });
 
 backgroundColourPicker.addEventListener('click', (event) => {
@@ -329,10 +386,26 @@ function drawText(container) {
 
   let y = container.y;
 
+  if(splitStrings.length > 1) {}
+
   for (text of splitStrings) {
+
     context.fillText(text, container.x, y);
-    y += textSize + 20;
+    y += textSize + 10;
   }
+
+  if(container.isEditable) {
+
+    // if(container.cursorPositionY > splitStrings.length - 1 || container.cursorPositionY < 0 )
+    //   return;
+
+    // const cursorPosX = context.measureText(splitStrings[container.cursorPositionY].slice(0,container.cursorPositionX)).width
+
+    // context.fillStyle = "black"
+    // context.fillRect(container.x + cursorPosX, (container.y) + ((textSize + 10 ) * container.cursorPositionY), 2 , textSize);
+  }
+
+
 
   // context.fillText(container.text, container.x, container.y);
 }
@@ -470,12 +543,28 @@ function findIfPointIsInsideContainer(testX, testY, x, y, width, height) {
   return false;
 }
 
+let mousedownTimeStamp = 0;
+let mouseupTimeStamp = 0;
+
+function drawContainers() {
+
+  // containerList.sort((a, b) => a.zIndex - b.zIndex);
+  context.fillStyle = backgroundColour;
+  context.fillRect(0, 0, canvasWidth, documentHeight);
+
+
+  for (const container of containerList) {
+      drawRotatedContainer(container);
+  }
+}
 
 canvas.addEventListener("mousedown", (event) => {
 
   clearCanvas();
 
   isMouseDown = true;
+  mousedownTimeStamp = Date.now();
+
 
   mouseDownX = getCursorPosition(canvas, event).x;
   mouseDownY = getCursorPosition(canvas, event).y;
@@ -509,6 +598,7 @@ canvas.addEventListener("mousedown", (event) => {
     
     else {
       container.isSelected = false;
+      container.isEditable = false;
     }
   }
 
@@ -517,6 +607,7 @@ canvas.addEventListener("mousedown", (event) => {
 
     containerList[lastPos].isSelected = true;
     containerList[lastPos].isDraggable = true;
+    containerList[lastPos].isEditable = true;
 
     draggingDeltaX = mouseDownX - containerList[lastPos].x;
     draggingDeltaY = mouseDownY - containerList[lastPos].y;
@@ -529,18 +620,6 @@ canvas.addEventListener("mousedown", (event) => {
   drawContainers();
 
 });
-
-function drawContainers() {
-
-  // containerList.sort((a, b) => a.zIndex - b.zIndex);
-  context.fillStyle = backgroundColour;
-  context.fillRect(0, 0, canvasWidth, documentHeight);
-
-
-  for (const container of containerList) {
-      drawRotatedContainer(container);
-  }
-}
 
 canvas.addEventListener("mousemove", (event) => {
 
@@ -598,11 +677,27 @@ canvas.addEventListener("mousemove", (event) => {
   
 });
 
+
+let clicks = [];
+
 canvas.addEventListener("mouseup", (event) => {
 
   clearCanvas();
 
   isMouseDown = false;
+  mouseupTimeStamp = Date.now();
+
+  clicks.push(mouseupTimeStamp);
+  if (clicks.length >= 2) {
+    
+    if(clicks[1] - clicks[0] <= 500) {
+      console.log("double click");
+      openModal()
+    }
+
+    clicks.splice(0,2);
+  }
+
 
   for(const container of containerList) {
 
@@ -618,6 +713,49 @@ canvas.addEventListener("mouseup", (event) => {
 
   drawContainers();
 });
+
+function openModal() {
+  document.getElementById("modalContainer").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("inputText").value = "";
+  document.getElementById("modalContainer").style.display = "none";
+}
+
+function submitText() {
+  const inputText = document.getElementById("inputText").value;
+  // alert("You entered: " + inputText);
+
+  context.font = font
+
+  const splitStringByLines = inputText.split("\n");
+
+  let metrics = context.measureText(inputText);
+  let fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+  let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+
+  const textWidth = metrics.width;
+
+  // console.log(metrics)
+  // console.log(actualHeight)
+  // console.log(textWidth)
+
+  let newWidth = 0;
+
+  for(let text of splitStringByLines) {
+    const w = context.measureText(text).width;
+    if(w > newWidth)
+          newWidth = w;
+  }
+
+  const text = new TextContainer(canvas.width/2 - newWidth/2, canvas.height/2, newWidth ,(textSize) * splitStringByLines.length + (10 * (splitStringByLines.length - 1)), undefined ,containerList.size, inputText);
+  // text.cursorPositionX = textPrompt.length;4 
+  containerList.push(text);
+  
+  drawContainers();
+  closeModal();
+}
 
 
 

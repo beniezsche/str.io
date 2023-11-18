@@ -3,6 +3,7 @@
 <head>
     <title>Str.io - Story Creator</title>
     <link rel="stylesheet" type="text/css" href="style.css">
+    
     <script src="jscolor-2.5.1/jscolor.js"></script> 
 </head>
 
@@ -28,6 +29,17 @@
       <!-- <div class="action-item">
         <img id="video" src="assets/movie.png" width="30" height="30"/>
       </div> -->
+    </div>
+
+
+    <!-- <button onclick="openModal()">Open Modal</button> -->
+  
+    <div class="modal-container" id="modalContainer">
+      <div class="modal-content">
+        <textarea type="text" class="input-field" id="inputText" placeholder="Enter your text"></textarea>
+        <button class="submit-button" onclick="submitText()">Add</button>
+        <button class="submit-button" onclick="closeModal()">Cancel</button>
+      </div>
     </div>
 
 
