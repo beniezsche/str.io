@@ -386,13 +386,20 @@ function drawText(container) {
 
   let y = container.y;
 
-  if(splitStrings.length > 1) {}
+  if(splitStrings.length > 1) {
 
-  for (text of splitStrings) {
+    for (let text of splitStrings) {
 
-    context.fillText(text, container.x, y);
-    y += textSize + 10;
+      context.fillText(text, container.x, y);
+      y += textSize + 10;
+    }
+
   }
+  else {
+    context.fillText(container.text, container.x, container.y);
+  }
+
+
 
   if(container.isEditable) {
 
@@ -407,7 +414,7 @@ function drawText(container) {
 
 
 
-  // context.fillText(container.text, container.x, container.y);
+  //context.fillText(container.text, container.x, container.y);
 }
 
 function drawUnselectedContainer(container) {
