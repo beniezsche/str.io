@@ -573,6 +573,11 @@ canvas.addEventListener("mousedown", (event) => {
   mousedownTimeStamp = Date.now();
 
 
+  const click = new Click();
+  click.setMouseDownTimestamp(mousedownTimeStamp);
+  clicks.push(click);
+
+
   mouseDownX = getCursorPosition(canvas, event).x;
   mouseDownY = getCursorPosition(canvas, event).y;
 
@@ -687,6 +692,22 @@ canvas.addEventListener("mousemove", (event) => {
 
 let clicks = [];
 
+class Click {
+
+    constructor() {
+      this.mouseDownTimestamp = -1;
+      this.mouseUpTimestamp = -1;
+    }
+
+    setMouseDownTimestamp(mouseDownTimestamp) {
+      this.mouseDownTimestamp = mouseDownTimestamp;
+    }
+
+    setMouseUpTimestamp(mouseUpTimestamp) {
+      this.mouseUpTimestamp = mouseUpTimestamp;
+    }
+}
+
 canvas.addEventListener("mouseup", (event) => {
 
   clearCanvas();
@@ -694,16 +715,18 @@ canvas.addEventListener("mouseup", (event) => {
   isMouseDown = false;
   mouseupTimeStamp = Date.now();
 
-  clicks.push(mouseupTimeStamp);
-  if (clicks.length >= 2) {
-    
-    if(clicks[1] - clicks[0] <= 500) {
-      console.log("double click");
-      openModal()
-    }
+  console.log(clicks);
 
-    clicks.splice(0,2);
-  }
+  // clicks.push(mouseupTimeStamp);
+  // if (clicks.length >= 2) {
+    
+  //   if(clicks[1] - clicks[0] <= 500) {
+  //     console.log("double click");
+  //     openModal()
+  //   }
+
+  //   clicks.splice(0,2);
+  // }
 
 
   for(const container of containerList) {
