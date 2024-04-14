@@ -6,6 +6,8 @@ const add = document.getElementById("add");
 const fileInput = document.getElementById("file");
 const textInput = document.getElementById("text");
 const canvas = document.getElementById("canvas");
+const addTextButton = document.getElementById("add-text-button");
+const closeModalButton = document.getElementById("close-modal-button");
 const backgroundColourPicker = document.getElementById("background");
 const context = canvas.getContext("2d");
 
@@ -62,6 +64,14 @@ class TextContainer extends Container {
 
 const reader = new FileReader();
 const img = new Image();
+
+addTextButton.addEventListener('click', (event) => {
+  submitText();
+});
+
+closeModalButton.addEventListener('click', (event) => {
+  closeModal();
+});
 
 fileInput.addEventListener('change', (event) => {
   const selectedFile = event.target.files[0];
@@ -665,6 +675,7 @@ function submitText() {
   drawContainers();
   closeModal();
 }
+
 
 
 
