@@ -1,6 +1,7 @@
 "use strict";
 
 import Container from "./containers/container.js";
+import createDialog from "./ui/dialog.js"
 
 const add = document.getElementById("add");
 const fileInput = document.getElementById("file");
@@ -30,6 +31,8 @@ const canvasWidth = documentWidth; //(9/16) * documentHeight;
 
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
+
+let isTextEditMode = false;
 
 
 // MODELS
@@ -65,11 +68,11 @@ class TextContainer extends Container {
 const reader = new FileReader();
 const img = new Image();
 
-addTextButton.addEventListener('click', (event) => {
+addTextButton?.addEventListener('click', (event) => {
   submitText();
 });
 
-closeModalButton.addEventListener('click', (event) => {
+closeModalButton?.addEventListener('click', (event) => {
   closeModal();
 });
 
@@ -471,11 +474,6 @@ canvas.addEventListener("mousedown", (event) => {
   mousedownTimeStamp = Date.now();
 
 
-  const click = new Click();
-  click.setMouseDownTimestamp(mousedownTimeStamp);
-  clicks.push(click);
-
-
   mouseDownX = getCursorPosition(canvas, event).x;
   mouseDownY = getCursorPosition(canvas, event).y;
 
@@ -587,28 +585,35 @@ canvas.addEventListener("mousemove", (event) => {
   
 });
 
+function openEditDialog(textItem) {
+  const dialog = createDialog((text) => { 
+                                          textItem.text = text;
+                                          document.body.removeChild(dialog); 
+                                        },
+                              () => document.body.removeChild(dialog));
+  document.body.appendChild(dialog);
+  dialog.style.display = "flex";
 
-let clicks = [];
-
-class Click {
-
-    constructor() {
-      this.mouseDownTimestamp = -1;
-      this.mouseUpTimestamp = -1;
-    }
-
-    setMouseDownTimestamp(mouseDownTimestamp) {
-      this.mouseDownTimestamp = mouseDownTimestamp;
-    }
-
-    setMouseUpTimestamp(mouseUpTimestamp) {
-      this.mouseUpTimestamp = mouseUpTimestamp;
-    }
+  return dialog;
 }
+
 
 canvas.addEventListener("dblclick", (event) => {
   console.log("double click");
-})
+
+  const x = event.clientX;
+  const y = event.clientY;
+
+  for (let item of containerList) {
+
+    if (item.isPointInsideRotatedContainer(x,y) && item instanceof TextContainer) {
+      openEditDialog(item);
+      document.getElementById("inputText").value = item.text;
+      break;
+    }
+
+  }
+});
 
 canvas.addEventListener("mouseup", (event) => {
 
@@ -634,7 +639,13 @@ canvas.addEventListener("mouseup", (event) => {
 });
 
 function openModal() {
-  document.getElementById("modalContainer").style.display = "flex";
+  // document.getElementById("modalContainer").style.display = "flex";
+
+  const dialog = createDialog((text) => { submitText(text); document.body.removeChild(dialog) },
+  () => document.body.removeChild(dialog));
+  console.log((dialog))
+  document.body.appendChild(dialog);
+  dialog.style.display = "flex";
 }
 
 function closeModal() {
@@ -642,8 +653,8 @@ function closeModal() {
   document.getElementById("modalContainer").style.display = "none";
 }
 
-function submitText() {
-  const inputText = document.getElementById("inputText").value;
+function submitText(inputText) {
+  // const inputText = document.getElementById("inputText").value;
   // alert("You entered: " + inputText);
 
   context.font = font
