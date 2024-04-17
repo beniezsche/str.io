@@ -8,6 +8,7 @@ const fileInput = document.getElementById("file");
 const textInput = document.getElementById("text");
 const canvas = document.getElementById("canvas");
 const addTextButton = document.getElementById("add-text-button");
+const addVideoButton = document.getElementById("video")
 const closeModalButton = document.getElementById("close-modal-button");
 const backgroundColourPicker = document.getElementById("background");
 const context = canvas.getContext("2d");
@@ -19,6 +20,7 @@ const margin = 10;
 const red = "#E74C3C";
 const green = "#2ECC71";
 const blue = "#3498DB";
+
 
 let backgroundColour = "#FFFFFF";
 
@@ -67,6 +69,8 @@ class TextContainer extends Container {
 
 const reader = new FileReader();
 const img = new Image();
+
+
 
 addTextButton?.addEventListener('click', (event) => {
   submitText();
@@ -122,7 +126,10 @@ montserratBold.load().then((loadedFont) => {
   
 });
 
+
+
 textInput.addEventListener('click', function() {
+
 
   // let textPrompt = prompt("Please add some text", ""); //"They decided to plant an orchard\nof cotton candy."; 
   // if (textPrompt != null) {
@@ -248,9 +255,15 @@ document.getElementById("foo").addEventListener('input', (event) => {
 
 backgroundColourPicker.addEventListener('click', (event) => {
 
+
   document.getElementById("foo").jscolor.show();
 
 });
+
+addVideoButton.addEventListener('click', function() {
+  console.log("yelp");
+});
+
 
 function drawRotatedContainer(container) { 
 
@@ -589,6 +602,7 @@ function openEditDialog(textItem) {
   const dialog = createDialog((text) => { 
                                           textItem.text = text;
                                           document.body.removeChild(dialog); 
+                                          drawContainers();
                                         },
                               () => document.body.removeChild(dialog));
   document.body.appendChild(dialog);
@@ -609,6 +623,7 @@ canvas.addEventListener("dblclick", (event) => {
     if (item.isPointInsideRotatedContainer(x,y) && item instanceof TextContainer) {
       openEditDialog(item);
       document.getElementById("inputText").value = item.text;
+
       break;
     }
 
