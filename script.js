@@ -5,6 +5,7 @@ import createDialog from "./ui/dialog.js"
 
 const add = document.getElementById("add");
 const fileInput = document.getElementById("file");
+const videoFileInput = document.getElementById("file-video")
 const textInput = document.getElementById("text");
 const canvas = document.getElementById("canvas");
 const addTextButton = document.getElementById("add-text-button");
@@ -68,9 +69,22 @@ class TextContainer extends Container {
 }
 
 const reader = new FileReader();
+const videoReader = new FileReader();
 const img = new Image();
 
+videoFileInput.addEventListener('change', (event) => {
 
+  const selectedFile = event.target.files[0];
+  
+  if (selectedFile) {
+    videoReader.readAsArrayBuffer(selectedFile);
+  }
+  
+});
+
+videoReader.addEventListener('load', (event) => {
+  console.log(event.target.result);
+});
 
 addTextButton?.addEventListener('click', (event) => {
   submitText();
@@ -260,9 +274,6 @@ backgroundColourPicker.addEventListener('click', (event) => {
 
 });
 
-addVideoButton.addEventListener('click', function() {
-  console.log("yelp");
-});
 
 
 function drawRotatedContainer(container) { 

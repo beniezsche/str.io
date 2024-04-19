@@ -62,6 +62,10 @@ body {
     margin-right: 10px;
 }
 
+#file-video {
+    display: none;
+}
+
 #file {
     display: none;
 }

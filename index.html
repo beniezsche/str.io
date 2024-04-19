@@ -4,6 +4,7 @@
     <title>Str.io - Story Creator</title>
     <link rel="stylesheet" type="text/css" href="style.css">
     <script src="jscolor-2.5.1/jscolor.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/@salomvary/ffmpeg.js-umd@3.1.9001/ffmpeg-mp4.min.js"></script>
 </head>
 
 <body>
@@ -26,7 +27,8 @@
         <img id="background" src="assets/background.png" width="30" height="30"/>
       </div>
       <div class="action-item">
-        <img id="video" src="assets/movie.png" width="30" height="30"/>
+        <label for="file-video"><img id="video" src="assets/movie.png" width="30" height="30"/> </label>
+        <input id="file-video" type="file" style="display: none;" />
       </div>
     </div>
 
