@@ -68,6 +68,16 @@ class TextContainer extends Container {
   }
 }
 
+class VideoContainer extends Container {
+  constructor(x,y,width,height,src, zIndex) {
+    super(x, y, width, height, src, zIndex);
+
+    this.isPlaying = false;
+    this.currentFrame = 0;
+
+  }
+}
+
 const reader = new FileReader();
 const videoReader = new FileReader();
 const img = new Image();
