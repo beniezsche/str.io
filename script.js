@@ -13,6 +13,7 @@ const addVideoButton = document.getElementById("video")
 const closeModalButton = document.getElementById("close-modal-button");
 const backgroundColourPicker = document.getElementById("background");
 const context = canvas.getContext("2d");
+const video = document.getElementById("myVideo")
 
 const containerList = [];
 
@@ -93,8 +94,35 @@ videoFileInput.addEventListener('change', (event) => {
 });
 
 videoReader.addEventListener('load', (event) => {
-  console.log(event.target.result);
+
+  let buffer = event.target.result;
+  let videoBlob = new Blob([new Uint8Array(buffer)], { type: 'video/mp4' });
+
+  // The blob gives us a URL to the video file:
+  let url = window.URL.createObjectURL(videoBlob);
+
+  console.log(url)
+
+  // video.width = documentWidth;
+  // video.height = documentHeight;
+
+  video.src = url;
+  video.play();
+
+  console.log("hello")
+
+  // new VideoContainer(0,0,)
+  
 });
+
+video.addEventListener("play", (event) => {
+  console.log(event)
+  function step() {
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+})
 
 addTextButton?.addEventListener('click', (event) => {
   submitText();

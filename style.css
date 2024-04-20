@@ -136,3 +136,9 @@ body {
     border-radius: 5px;
     cursor: pointer;
 }
+
+#myVideo {
+    display: none;
+    visibility: hidden;
+    z-index: 999;
+}
