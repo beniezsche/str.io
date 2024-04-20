@@ -124,6 +124,7 @@ videoReader.addEventListener('load', (event) => {
             // You can render the frame onto a canvas, display it in a video element, etc.
             console.log(frame)
             context.drawImage(frame, 0, 0, canvas.width, canvas.height);
+            
         }
     });
 
