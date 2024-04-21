@@ -39,9 +39,6 @@ canvas.height = canvasHeight;
 let isTextEditMode = false;
 
 
-// MODELS
-
-
 function clearCanvas() {
   context.clearRect(0, 0, canvas.width, canvas.height);
 
