@@ -55,7 +55,6 @@ function getCursorPosition(canvas, event) {
 }
 
 
-
 class TextContainer extends Container {
   constructor(x, y, width, height, src, zIndex, text) {
     super(x, y, width, height, src, zIndex);
@@ -100,86 +99,52 @@ videoReader.addEventListener('load', (event) => {
 
   console.log(url)
 
-  video.width = documentWidth;
-  video.height = documentHeight;
-
-  video.src = url;
-  // video.pause();
+  let videoPlayer = document.createElement("video");
+  videoPlayer.className = "video-player"
 
 
-  // new VideoContainer(0,0,)
+  videoPlayer.width = 200;
+  videoPlayer.height = 200;
 
-    // Check if the browser supports the WebCodecs API
-  if ('VideoDecoder' in window) {
+  videoPlayer.src = url;
 
-    console.log("videodecoder exists");
-    // Create a new VideoDecoder instance
+  document.body.appendChild(videoPlayer);
 
-    try {
-      const videoDecoder = new VideoDecoder({
-        output: (frame) => {
-            // This callback function is called whenever a video frame is decoded
-            // 'frame' is a VideoFrame object representing the decoded frame
-            // You can render the frame onto a canvas, display it in a video element, etc.
-            console.log(frame)
-            context.drawImage(frame, 0, 0, canvas.width, canvas.height);
-            
-        }
-    });
-      videoDecoder.decode(buffer);
+
+  let videoContainer = null;
+
+  videoPlayer.addEventListener("loadedmetadata", (event) => {
+    console.log(event);
+
+    const videoHeight = event.target.videoHeight;
+    const videoWidth = event.target.videoWidth;
+
+    const heightToWidthRatio = videoHeight/videoWidth;
+
+    const newVideoWidth = 500;
+    const newVideoHeight = heightToWidthRatio * newVideoWidth;
+
+    videoContainer = new VideoContainer(34,34,newVideoWidth, newVideoHeight);
+
+    containerList.push(videoContainer);
+    videoPlayer.play();
+
+  });
+
+  videoPlayer.addEventListener("play", (event) => {
+    console.log(event)
+    function step() {
+      videoContainer.currentFrame = videoPlayer;
+      //context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      drawContainers()
+      requestAnimationFrame(step);
     }
-    catch (e) {
-      console.log(e)
-    }
-
-
-    // Fetch and decode a video file
-    // fetch('example-video.mp4')
-    //     .then(response => response.arrayBuffer())
-    //     .then(arrayBuffer => {
-    //         // Decode the video data
-    //         videoDecoder.decode(arrayBuffer);
-    //     })
-    //     .catch(error => {
-    //         console.error('Error fetching or decoding video:', error);
-    //     });
-  } else {
-    console.error('WebCodecs API is not supported in this browser.');
-  }
-
+    requestAnimationFrame(step);
+  });
   
 });
 
-let videoContainer = null;
 
-video.addEventListener("loadedmetadata", (event) => {
-  console.log(event);
-
-  const videoHeight = event.target.videoHeight;
-  const videoWidth = event.target.videoWidth;
-
-  const heightToWidthRatio = videoHeight/videoWidth;
-
-  const newVideoWidth = 500;
-  const newVideoHeight = heightToWidthRatio * newVideoWidth;
-
-  videoContainer = new VideoContainer(34,34,newVideoWidth, newVideoHeight);
-
-  containerList.push(videoContainer);
-  video.play();
-
-});
-
-video.addEventListener("play", (event) => {
-  console.log(event)
-  function step() {
-    videoContainer.currentFrame = video;
-    //context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    drawContainers()
-    requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-})
 
 addTextButton?.addEventListener('click', (event) => {
   submitText();
@@ -446,7 +411,6 @@ function drawUnselectedContainer(container) {
     drawText(container)
   }
   else if (container instanceof VideoContainer) {
-    console.log("video container");
     context.drawImage(container.currentFrame, container.x, container.y, container.width, container.height);
   } 
   else {
@@ -465,7 +429,6 @@ function drawSelectedContainer(container) {
     drawText(container)
   }
   else if (container instanceof VideoContainer) {
-    console.log("video container");
     context.drawImage(container.currentFrame, container.x, container.y, container.width, container.height);
   } 
   else {

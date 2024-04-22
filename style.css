@@ -142,3 +142,9 @@ body {
     visibility: hidden;
     z-index: 999;
 }
+
+.video-player {
+    display: none;
+    visibility: hidden;
+    z-index: 999; 
+}
