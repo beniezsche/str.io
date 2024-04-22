@@ -100,11 +100,11 @@ videoReader.addEventListener('load', (event) => {
 
   console.log(url)
 
-  // video.width = documentWidth;
-  // video.height = documentHeight;
+  video.width = documentWidth;
+  video.height = documentHeight;
 
-  // video.src = url;
-  // video.play();
+  video.src = url;
+  // video.pause();
 
 
   // new VideoContainer(0,0,)
@@ -114,7 +114,9 @@ videoReader.addEventListener('load', (event) => {
 
     console.log("videodecoder exists");
     // Create a new VideoDecoder instance
-    const videoDecoder = new VideoDecoder({
+
+    try {
+      const videoDecoder = new VideoDecoder({
         output: (frame) => {
             // This callback function is called whenever a video frame is decoded
             // 'frame' is a VideoFrame object representing the decoded frame
@@ -124,8 +126,6 @@ videoReader.addEventListener('load', (event) => {
             
         }
     });
-
-    try {
       videoDecoder.decode(buffer);
     }
     catch (e) {
@@ -150,14 +150,36 @@ videoReader.addEventListener('load', (event) => {
   
 });
 
-// video.addEventListener("play", (event) => {
-//   console.log(event)
-//   function step() {
-//     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-//     requestAnimationFrame(step);
-//   }
-//   requestAnimationFrame(step);
-// })
+let videoContainer = null;
+
+video.addEventListener("loadedmetadata", (event) => {
+  console.log(event);
+
+  const videoHeight = event.target.videoHeight;
+  const videoWidth = event.target.videoWidth;
+
+  const heightToWidthRatio = videoHeight/videoWidth;
+
+  const newVideoWidth = 500;
+  const newVideoHeight = heightToWidthRatio * newVideoWidth;
+
+  videoContainer = new VideoContainer(34,34,newVideoWidth, newVideoHeight);
+
+  containerList.push(videoContainer);
+  video.play();
+
+});
+
+video.addEventListener("play", (event) => {
+  console.log(event)
+  function step() {
+    videoContainer.currentFrame = video;
+    //context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    drawContainers()
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+})
 
 addTextButton?.addEventListener('click', (event) => {
   submitText();
@@ -423,6 +445,10 @@ function drawUnselectedContainer(container) {
   if(container instanceof TextContainer) {
     drawText(container)
   }
+  else if (container instanceof VideoContainer) {
+    console.log("video container");
+    context.drawImage(container.currentFrame, container.x, container.y, container.width, container.height);
+  } 
   else {
     context.drawImage(container.image, container.x, container.y, container.width, container.height);
   }
@@ -438,6 +464,10 @@ function drawSelectedContainer(container) {
   if(container instanceof TextContainer) {
     drawText(container)
   }
+  else if (container instanceof VideoContainer) {
+    console.log("video container");
+    context.drawImage(container.currentFrame, container.x, container.y, container.width, container.height);
+  } 
   else {
     context.drawImage(container.image, container.x, container.y, container.width, container.height);
   }
