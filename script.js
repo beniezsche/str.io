@@ -106,10 +106,12 @@ videoReader.addEventListener('load', (event) => {
   videoPlayer.width = 200;
   videoPlayer.height = 200;
 
+  videoPlayer.loop = true;
+  videoPlayer.muted = true;
+
   videoPlayer.src = url;
 
   document.body.appendChild(videoPlayer);
-
 
   let videoContainer = null;
 
