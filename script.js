@@ -1,11 +1,19 @@
 "use strict";
 
+import Container from "./containers/container.js";
+import createDialog from "./ui/dialog.js"
+
 const add = document.getElementById("add");
 const fileInput = document.getElementById("file");
+const videoFileInput = document.getElementById("file-video")
 const textInput = document.getElementById("text");
 const canvas = document.getElementById("canvas");
+const addTextButton = document.getElementById("add-text-button");
+const addVideoButton = document.getElementById("video")
+const closeModalButton = document.getElementById("close-modal-button");
 const backgroundColourPicker = document.getElementById("background");
 const context = canvas.getContext("2d");
+const video = document.getElementById("myVideo")
 
 const containerList = [];
 
@@ -14,6 +22,7 @@ const margin = 10;
 const red = "#E74C3C";
 const green = "#2ECC71";
 const blue = "#3498DB";
+
 
 let backgroundColour = "#FFFFFF";
 
@@ -27,8 +36,7 @@ const canvasWidth = documentWidth; //(9/16) * documentHeight;
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
 
-
-// MODELS
+let isTextEditMode = false;
 
 
 function clearCanvas() {
@@ -46,92 +54,6 @@ function getCursorPosition(canvas, event) {
           y:y};
 }
 
-class Container {
-
-  constructor(x, y, width, height, src, zIndex) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.isSelected = false;
-    this.isDraggable = true;
-    this.isResizable = false;
-    this.isRotatable = false;
-
-    this.zIndex = zIndex;
-
-    this.image = new Image();
-    this.image.src = src
-
-    this.rotation = 0;
-
-    const borderX = x - margin;
-    const borderY = y - margin;
-
-    const borderWidth = width + (2 * margin);
-    const borderHeight = height + (2 * margin);
-
-    this.border = new Border(borderX, borderY, borderWidth, borderHeight);
-
-    const resizeHandleSide = 10;
-
-    const resizeHandleX = (this.border.x + this.border.width) - (resizeHandleSide/2);
-    const resizeHandleY = (this.border.y + this.border.height) - (resizeHandleSide/2); 
-
-    this.resizeHandle = new Handle(resizeHandleX, resizeHandleY, resizeHandleSide, resizeHandleSide);
-
-    const midpointXBottom = this.border.x + (this.border.width/2) ;
-    const midpointYBottom = this.border.y;
-
-    const lineLength = 50;
-
-    const midpointXTop = midpointXBottom;
-    const midpointYTop = midpointYBottom - lineLength;
-
-    const rotateHandleSide = 10;
-
-    //calculate the new resize handle co ordinates
-    const rotateHandleX = (midpointXTop) - (rotateHandleSide/2);
-    const rotateHandleY = (midpointYTop ) - (rotateHandleSide/2); 
-
-    this.rotateHandle = new Handle(rotateHandleX, rotateHandleY, resizeHandleSide, resizeHandleSide);
-
-    const deleteHandleSize = 10;
-
-    const deleteHandleX = (this.border.x + this.border.width) - (deleteHandleSize/2);
-    const deleteHandleY = (this.border.y) - (deleteHandleSize/2); 
-
-    this.deleteHandle = new Handle(deleteHandleX, deleteHandleY, deleteHandleSize, deleteHandleSize);
-  }
-
-  isPointInsideRotatedContainer(x,y) {
-
-    const a = -this.rotation
-
-    const diffX = x - (this.x + this.width / 2);
-    const diffY = y - (this.y + this.height / 2);
-
-    //Rotate the canvas around the origin
-    const unrotatedX = (diffX * Math.cos(a) - diffY * Math.sin(a)) ;
-    const unrotatedY = (diffX * Math.sin(a) + diffY * Math.cos(a)) ;
-
-    const newDiffX = (this.x + this.width / 2) + unrotatedX;
-    const newDiffY = (this.y + this.height / 2) + unrotatedY;
-
-    const isPointInsideContainer = this.isPointInsideContainer(newDiffX, newDiffY);
-
-    return isPointInsideContainer
-  }
-
-  isPointInsideContainer(x, y) {
-
-    if(x > 0 && y > 0 && x > this.x && x < (this.x + this.width) && y > this.y && y < (this.y + this.height)) {
-      return true;
-    }
-
-    return false;
-  }
-}
 
 class TextContainer extends Container {
   constructor(x, y, width, height, src, zIndex, text) {
@@ -143,37 +65,96 @@ class TextContainer extends Container {
   }
 }
 
-class Handle {
-  constructor(x, y, width, height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-  }
+class VideoContainer extends Container {
+  constructor(x,y,width,height,src, zIndex) {
+    super(x, y, width, height, src, zIndex);
 
-  isPointInsideContainer(x, y) {
+    this.isPlaying = false;
+    this.currentFrame = 0;
 
-    if(x > 0 && y > 0 && x > this.x && x < (this.x + this.width) && y > this.y && y < (this.y + this.height)) {
-      return true;
-    }
-
-    return false;
-  }
-
-
-}
-
-class Border {
-  constructor(x, y, width, height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
   }
 }
 
 const reader = new FileReader();
+const videoReader = new FileReader();
 const img = new Image();
+
+videoFileInput.addEventListener('change', (event) => {
+
+  const selectedFile = event.target.files[0];
+  
+  if (selectedFile) {
+    videoReader.readAsArrayBuffer(selectedFile);
+  }
+  
+});
+
+videoReader.addEventListener('load', (event) => {
+
+  let buffer = event.target.result;
+  let videoBlob = new Blob([new Uint8Array(buffer)], { type: 'video/mp4' });
+
+  // The blob gives us a URL to the video file:
+  let url = window.URL.createObjectURL(videoBlob);
+
+  console.log(url)
+
+  let videoPlayer = document.createElement("video");
+  videoPlayer.className = "video-player"
+
+
+  videoPlayer.width = 200;
+  videoPlayer.height = 200;
+
+  videoPlayer.loop = true;
+  videoPlayer.muted = true;
+
+  videoPlayer.src = url;
+
+  document.body.appendChild(videoPlayer);
+
+  let videoContainer = null;
+
+  videoPlayer.addEventListener("loadedmetadata", (event) => {
+    console.log(event);
+
+    const videoHeight = event.target.videoHeight;
+    const videoWidth = event.target.videoWidth;
+
+    const heightToWidthRatio = videoHeight/videoWidth;
+
+    const newVideoWidth = 500;
+    const newVideoHeight = heightToWidthRatio * newVideoWidth;
+
+    videoContainer = new VideoContainer(34,34,newVideoWidth, newVideoHeight);
+
+    containerList.push(videoContainer);
+    videoPlayer.play();
+
+  });
+
+  videoPlayer.addEventListener("play", (event) => {
+    console.log(event)
+    function step() {
+      videoContainer.currentFrame = videoPlayer;
+      //context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      drawContainers()
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+  
+});
+
+
+
+addTextButton?.addEventListener('click', (event) => {
+  submitText();
+});
+
+closeModalButton?.addEventListener('click', (event) => {
+  closeModal();
+});
 
 fileInput.addEventListener('change', (event) => {
   const selectedFile = event.target.files[0];
@@ -221,7 +202,10 @@ montserratBold.load().then((loadedFont) => {
   
 });
 
+
+
 textInput.addEventListener('click', function() {
+
 
   // let textPrompt = prompt("Please add some text", ""); //"They decided to plant an orchard\nof cotton candy."; 
   // if (textPrompt != null) {
@@ -347,9 +331,12 @@ document.getElementById("foo").addEventListener('input', (event) => {
 
 backgroundColourPicker.addEventListener('click', (event) => {
 
+
   document.getElementById("foo").jscolor.show();
 
 });
+
+
 
 function drawRotatedContainer(container) { 
 
@@ -425,6 +412,9 @@ function drawUnselectedContainer(container) {
   if(container instanceof TextContainer) {
     drawText(container)
   }
+  else if (container instanceof VideoContainer) {
+    context.drawImage(container.currentFrame, container.x, container.y, container.width, container.height);
+  } 
   else {
     context.drawImage(container.image, container.x, container.y, container.width, container.height);
   }
@@ -440,6 +430,9 @@ function drawSelectedContainer(container) {
   if(container instanceof TextContainer) {
     drawText(container)
   }
+  else if (container instanceof VideoContainer) {
+    context.drawImage(container.currentFrame, container.x, container.y, container.width, container.height);
+  } 
   else {
     context.drawImage(container.image, container.x, container.y, container.width, container.height);
   }
@@ -573,11 +566,6 @@ canvas.addEventListener("mousedown", (event) => {
   mousedownTimeStamp = Date.now();
 
 
-  const click = new Click();
-  click.setMouseDownTimestamp(mousedownTimeStamp);
-  clicks.push(click);
-
-
   mouseDownX = getCursorPosition(canvas, event).x;
   mouseDownY = getCursorPosition(canvas, event).y;
 
@@ -689,24 +677,37 @@ canvas.addEventListener("mousemove", (event) => {
   
 });
 
+function openEditDialog(textItem) {
+  const dialog = createDialog((text) => { 
+                                          textItem.text = text;
+                                          document.body.removeChild(dialog); 
+                                          drawContainers();
+                                        },
+                              () => document.body.removeChild(dialog));
+  document.body.appendChild(dialog);
+  dialog.style.display = "flex";
 
-let clicks = [];
-
-class Click {
-
-    constructor() {
-      this.mouseDownTimestamp = -1;
-      this.mouseUpTimestamp = -1;
-    }
-
-    setMouseDownTimestamp(mouseDownTimestamp) {
-      this.mouseDownTimestamp = mouseDownTimestamp;
-    }
-
-    setMouseUpTimestamp(mouseUpTimestamp) {
-      this.mouseUpTimestamp = mouseUpTimestamp;
-    }
+  return dialog;
 }
+
+
+canvas.addEventListener("dblclick", (event) => {
+  console.log("double click");
+
+  const x = event.clientX;
+  const y = event.clientY;
+
+  for (let item of containerList) {
+
+    if (item.isPointInsideRotatedContainer(x,y) && item instanceof TextContainer) {
+      openEditDialog(item);
+      document.getElementById("inputText").value = item.text;
+
+      break;
+    }
+
+  }
+});
 
 canvas.addEventListener("mouseup", (event) => {
 
@@ -714,19 +715,6 @@ canvas.addEventListener("mouseup", (event) => {
 
   isMouseDown = false;
   mouseupTimeStamp = Date.now();
-
-  console.log(clicks);
-
-  // clicks.push(mouseupTimeStamp);
-  // if (clicks.length >= 2) {
-    
-  //   if(clicks[1] - clicks[0] <= 500) {
-  //     console.log("double click");
-  //     openModal()
-  //   }
-
-  //   clicks.splice(0,2);
-  // }
 
 
   for(const container of containerList) {
@@ -745,7 +733,13 @@ canvas.addEventListener("mouseup", (event) => {
 });
 
 function openModal() {
-  document.getElementById("modalContainer").style.display = "flex";
+  // document.getElementById("modalContainer").style.display = "flex";
+
+  const dialog = createDialog((text) => { submitText(text); document.body.removeChild(dialog) },
+  () => document.body.removeChild(dialog));
+  console.log((dialog))
+  document.body.appendChild(dialog);
+  dialog.style.display = "flex";
 }
 
 function closeModal() {
@@ -753,8 +747,8 @@ function closeModal() {
   document.getElementById("modalContainer").style.display = "none";
 }
 
-function submitText() {
-  const inputText = document.getElementById("inputText").value;
+function submitText(inputText) {
+  // const inputText = document.getElementById("inputText").value;
   // alert("You entered: " + inputText);
 
   context.font = font
@@ -786,6 +780,7 @@ function submitText() {
   drawContainers();
   closeModal();
 }
+
 
 
 

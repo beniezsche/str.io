@@ -3,7 +3,6 @@
 <head>
     <title>Str.io - Story Creator</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    
     <script src="jscolor-2.5.1/jscolor.js"></script> 
 </head>
 
@@ -11,6 +10,8 @@
     <canvas id="canvas">
        Your browser doesn't support canvas API
     </canvas>
+
+
 
     <div class="actions-container">
 
@@ -26,21 +27,27 @@
         <input id="foo" data-jscolor="{}" value="cc4499">
         <img id="background" src="assets/background.png" width="30" height="30"/>
       </div>
-      <!-- <div class="action-item">
-        <img id="video" src="assets/movie.png" width="30" height="30"/>
-      </div> -->
+      <div class="action-item">
+        <label for="file-video"><img id="video" src="assets/movie.png" width="30" height="30"/> </label>
+        <input id="file-video" type="file" style="display: none;" />
+      </div>
     </div>
+
+
+    <!-- <video id="myVideo" width="500" height="500" loop controls></video> -->
 
 
     <!-- <button onclick="openModal()">Open Modal</button> -->
   
-    <div class="modal-container" id="modalContainer">
+    <!-- <div class="modal-container" id="modalContainer">
       <div class="modal-content">
         <textarea type="text" class="input-field" id="inputText" placeholder="Enter your text"></textarea>
-        <button class="submit-button" onclick="submitText()">Add</button>
-        <button class="submit-button" onclick="closeModal()">Cancel</button>
+        <button id="add-text-button" class="submit-button">Add</button>
+        <button id="close-modal-button" class="submit-button">Cancel</button>
       </div>
-    </div>
+    </div> -->
+
+
 
 
 
@@ -65,7 +72,8 @@
         </p>
     </video> -->
 
-    <script src="script.js"></script> 
+    <!-- <script type="module" src="containers/container.js"></script> -->
+    <script src="script.js" type="module"></script> 
 </body>
 
 </html>
