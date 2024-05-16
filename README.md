@@ -4,4 +4,4 @@ Str.io is a simple freeform canvas where you can add images, text and videos(soo
 
 ## Screenshot
 
-![](https://github.com/bikraman/str.io/blob/master/screenshots/screenshot1.png)
+![](https://github.com/bikraman/str.io/blob/master/screenshots/storio_demo.gif)
