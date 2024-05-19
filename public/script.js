@@ -1,7 +1,9 @@
 "use strict";
 
 import Container from "./containers/container.js";
+import TextContainer from "./text/textContainer.js";
 import createDialog from "./ui/dialog.js"
+// import createTextContainerFromInput from "./text/text.js";
 
 const add = document.getElementById("add");
 const fileInput = document.getElementById("file");
@@ -55,15 +57,7 @@ function getCursorPosition(canvas, event) {
 }
 
 
-class TextContainer extends Container {
-  constructor(x, y, width, height, src, zIndex, text) {
-    super(x, y, width, height, src, zIndex);
-    this.text = text;
-    this.isEditable = false;
-    this.cursorPositionX = 0;
-    this.cursorPositionY = 0;
-  }
-}
+
 
 class VideoContainer extends Container {
   constructor(x,y,width,height,src, zIndex) {
@@ -111,7 +105,7 @@ videoReader.addEventListener('load', (event) => {
 
   videoPlayer.src = url;
 
-  document.body.appendChild(videoPlayer);
+  // document.body.appendChild(videoPlayer);
 
   let videoContainer = null;
 
@@ -193,15 +187,105 @@ let font = null
 montserratBold.load().then((loadedFont) => {
 
   document.fonts.add(loadedFont)
-
   font = textSize + "px Montserrat";
 
-  submitText("Hi, welcome to Str.io")
+  context.font = font
 
-  
+  const welcomeText = createTextContainerFromInput("Hi, welcome to Str.io. \nYou can add images and videos. ", context)
+  welcomeText.x = canvasWidth/2 - welcomeText.width;
+  containerList.push(welcomeText)
+
+  const image = new Image();
+  image.src = "sample/image.jpg";
+
+  image.addEventListener('load', (event) => {
+    const imageWidth = image.width;
+    const imageHeight = image.height;
+
+    const newImageWidth = 250;
+    const newImageHeight = (newImageWidth * imageHeight) / imageWidth;
+
+    const container = new Container(canvas.width/2, canvas.height/2, newImageWidth, newImageHeight, image.src, containerList.size);
+    
+    container.rotation = 0.3;
+    container.x = 100;
+    container.y = 100;
+    containerList.push(container);
+
+    drawContainers();
+  })
+
+  let videoPlayer = document.createElement("video");
+  videoPlayer.className = "video-player"
+
+  videoPlayer.width = 200;
+  videoPlayer.height = 200;
+
+  videoPlayer.loop = true;
+  videoPlayer.muted = true;
+
+  videoPlayer.src = "sample/video.mp4";
+
+  // document.body.appendChild(videoPlayer);
+
+  let videoContainer = null;
+
+  videoPlayer.addEventListener("loadedmetadata", (event) => {
+    console.log(event);
+
+    const videoHeight = event.target.videoHeight;
+    const videoWidth = event.target.videoWidth;
+
+    const heightToWidthRatio = videoHeight/videoWidth;
+
+    const newVideoWidth = 500;
+    const newVideoHeight = heightToWidthRatio * newVideoWidth;
+
+    videoContainer = new VideoContainer(canvasWidth - newVideoWidth - 10,canvasHeight/2,newVideoWidth, newVideoHeight);
+
+    containerList.push(videoContainer);
+    videoPlayer.play();
+
+  });
+
+  videoPlayer.addEventListener("play", (event) => {
+    console.log(event)
+    function step() {
+      videoContainer.currentFrame = videoPlayer;
+      //context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      drawContainers()
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
 });
 
+function createTextContainerFromInput(inputText, context) {
 
+  const splitStringByLines = inputText.split("\n");
+
+  let metrics = context.measureText(inputText);
+  let fontHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+  let actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+
+  const textWidth = metrics.width;
+
+  // console.log(metrics)
+  // console.log(actualHeight)
+  // console.log(textWidth)
+
+  let newWidth = 0;
+
+  for(let text of splitStringByLines) {
+  const w = context.measureText(text).width;
+  if(w > newWidth)
+      newWidth = w;
+  }
+
+  const text = new TextContainer(canvas.width/2 - newWidth/2, canvas.height/2, newWidth ,(textSize) * splitStringByLines.length + (10 * (splitStringByLines.length - 1)), undefined ,containerList.size, inputText);
+  return text;
+
+}
 
 textInput.addEventListener('click', function() {
 
@@ -329,10 +413,7 @@ document.getElementById("foo").addEventListener('input', (event) => {
 });
 
 backgroundColourPicker.addEventListener('click', (event) => {
-
-
   document.getElementById("foo").jscolor.show();
-
 });
 
 
@@ -747,8 +828,6 @@ function closeModal() {
 }
 
 function submitText(inputText) {
-  // const inputText = document.getElementById("inputText").value;
-  // alert("You entered: " + inputText);
 
   context.font = font
 
