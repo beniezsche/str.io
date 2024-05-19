@@ -193,8 +193,11 @@ let font = null
 montserratBold.load().then((loadedFont) => {
 
   document.fonts.add(loadedFont)
-  
+
   font = textSize + "px Montserrat";
+
+  submitText("Hi, welcome to Str.io")
+
   
 });
 
@@ -766,7 +769,7 @@ function submitText(inputText) {
   for(let text of splitStringByLines) {
     const w = context.measureText(text).width;
     if(w > newWidth)
-          newWidth = w;
+      newWidth = w;
   }
 
   const text = new TextContainer(canvas.width/2 - newWidth/2, canvas.height/2, newWidth ,(textSize) * splitStringByLines.length + (10 * (splitStringByLines.length - 1)), undefined ,containerList.size, inputText);
@@ -776,6 +779,7 @@ function submitText(inputText) {
   drawContainers();
   closeModal();
 }
+
 
 
 
