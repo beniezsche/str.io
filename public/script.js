@@ -192,12 +192,8 @@ let font = null
 
 montserratBold.load().then((loadedFont) => {
 
-  alert("Font loaded!")
-
   document.fonts.add(loadedFont)
-
-  // console.log(loadedFont)
-
+  
   font = textSize + "px Montserrat";
   
 });
